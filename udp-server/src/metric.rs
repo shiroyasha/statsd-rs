@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum MetricType {
     Timing,
     Gauge,
@@ -31,5 +31,40 @@ pub fn parse<'a>(buffer : &'a str) -> Metric<'a> {
         metric_type : metric_type,
         value: value,
         name: name
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_counter_metric_test() {
+        let input  = "some_metric:1|c";
+        let metric = parse(input);
+
+        assert_eq!(metric.name, "some_metric");
+        assert_eq!(metric.value, 1);
+        assert_eq!(metric.metric_type, MetricType::Counter);
+    }
+
+    #[test]
+    fn parse_gauge_metric_test() {
+        let input  = "some_metric:10|g";
+        let metric = parse(input);
+
+        assert_eq!(metric.name, "some_metric");
+        assert_eq!(metric.value, 10);
+        assert_eq!(metric.metric_type, MetricType::Gauge);
+    }
+
+    #[test]
+    fn parse_timing_metric_test() {
+        let input  = "some_metric:10|ms";
+        let metric = parse(input);
+
+        assert_eq!(metric.name, "some_metric");
+        assert_eq!(metric.value, 10);
+        assert_eq!(metric.metric_type, MetricType::Timing);
     }
 }
