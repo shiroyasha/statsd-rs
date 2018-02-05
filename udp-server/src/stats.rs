@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use metric::{Metric, MetricType};
+use metric::{self, Metric, MetricType};
 
 pub struct Stats {
     pub counters: HashMap<String, i64>,
@@ -34,4 +34,43 @@ impl Stats {
             }
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn processing_counters_test() {
+        let mut stats = Stats::new();
+
+        for _ in 0..10 {
+            stats.process_metric(&metric::parse("test:1|c"));
+        }
+
+        assert_eq!(stats.counters.get("test").unwrap(), &10);
+    }
+
+    #[test]
+    fn processing_gauges_test() {
+        let mut stats = Stats::new();
+
+        for _ in 0..10 {
+            stats.process_metric(&metric::parse("test:10|g"));
+        }
+
+        assert_eq!(stats.gauges.get("test").unwrap(), &10);
+    }
+
+    #[test]
+    fn processing_timing_test() {
+        let mut stats = Stats::new();
+
+        for _ in 0..3 {
+            stats.process_metric(&metric::parse("test:10|ms"));
+        }
+
+        assert_eq!(stats.timings.get("test").unwrap(), &vec![10, 10, 10]);
+    }
+
 }
